@@ -10,8 +10,16 @@ so some pixelization may occur.
 Usage
 -----
 
-python pgSlideShow.py [directory]
-pgSlideShow is a command-line application. To run it, simply type the command above, specifying the path to the directory in which your images are located. If no directory is given, pgSlideShow will recursively search for images in the directory from which it is run.
+This is a command-line application. To run it, type the following command,
+specifying the path to the directory in which your images are located.
+
+If no directory is given, pgSlideShow will recursively search for images in
+the directory from which it is run.
+
+::
+
+    python pgSlideShow.py [directory]
+
 
 History
 -------
