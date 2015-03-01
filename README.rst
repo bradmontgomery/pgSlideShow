@@ -31,6 +31,10 @@ the directory from which it is run.
     python src/pgSlideShow.py [directory]
 
 
+This also supports a couple of command-line flags. Run ``pgSlidShow.py -h`` for
+more details.
+
+
 History
 -------
 
