@@ -1,7 +1,8 @@
+#!/usr/bin/env python
 """
 A pygame program to show a slideshow of all images buried in a given directory.
 
-Released: 2007.10.31 (Happy halloween!)
+Originally Released: 2007.10.31 (Happy halloween!)
 
 """
 import os
@@ -60,8 +61,18 @@ def input(events):
 def main(startdir="."):
     global file_list, title, waittime
 
-    walktree(startdir, addtolist)  # this may take a while...
     pygame.init()
+
+    # Test for image support
+    if not pygame.image.get_extended():
+        print "Your Pygame isn't built with extended image support."
+        print "It's likely this isn't going to work."
+        sys.exit(1)
+
+    walktree(startdir, addtolist)  # this may take a while...
+    if len(file_list) == 0:
+        print "Sorry. No images found. Exiting."
+        sys.exit(1)
 
     modes = pygame.display.list_modes()
     pygame.display.set_mode(max(modes))
@@ -73,18 +84,21 @@ def main(startdir="."):
     current = 0
     num_files = len(file_list)
     while(True):
-        img = pygame.image.load(file_list[current])
-        img = img.convert()
-        # rescale the image to fit the current display
-        img = pygame.transform.scale(img, max(modes))
-        screen.blit(img, (0, 0))
-        pygame.display.flip()
-        if current == num_files - 1:
-            current = 0  # loop the slideshow
-        else:
-            current = current + 1
-        input(pygame.event.get())
-        time.sleep(waittime)
+        try:
+            img = pygame.image.load(file_list[current])
+            img = img.convert()
+            # rescale the image to fit the current display
+            img = pygame.transform.scale(img, max(modes))
+            screen.blit(img, (0, 0))
+            pygame.display.flip()
+
+            input(pygame.event.get())
+            time.sleep(waittime)
+        except pygame.error as err:
+            print "Failed to display %s: %s" % (file_list[current], err)
+
+        # When we get to the end, re-start at the beginning
+        current = (current + 1) % num_files;
 
 
 if __name__ == '__main__':
