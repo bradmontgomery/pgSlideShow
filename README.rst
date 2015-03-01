@@ -13,7 +13,9 @@ image files is slow and probably takes up more memory than it should.
 Requirements
 ------------
 
-You need to have pygame installed and on your python path.
+You need to have pygame installed and on your python path, and it needs to have
+been built with with full image support, otherwise it will not be able to load
+most image formats. See [the pygame.image](http://www.pygame.org/docs/ref/image.html) docs.
 
 Usage
 -----
@@ -26,7 +28,7 @@ the directory from which it is run.
 
 ::
 
-    python pgSlideShow.py [directory]
+    python src/pgSlideShow.py [directory]
 
 
 History
