@@ -116,8 +116,17 @@ if __name__ == '__main__':
         default=1,
         help='Amount of time to wait before showing the next image.'
     )
+    parser.add_argument(
+        '--title',
+        type=str,
+        dest='title',
+        action='store',
+        default="pgSlidShow | My Slideshow!",
+        help='Set the title for the display window.'
+    )
     args = parser.parse_args()
     waittime = args.waittime
+    title = args.title
 
     if len(sys.argv) == 2:
         main(sys.argv[1])
