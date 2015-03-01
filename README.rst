@@ -6,6 +6,14 @@ It recursively searches a given directory for image files, and then displays
 them in Fullscreen mode. Images are currently resized to fit the screen,
 so some pixelization may occur.
 
+*Note*: this code aims for simplicity over performance. The inital search for
+image files is slow and probably takes up more memory than it should.
+
+
+Requirements
+------------
+
+You need to have pygame installed and on your python path.
 
 Usage
 -----
