@@ -5,6 +5,7 @@ A pygame program to show a slideshow of all images buried in a given directory.
 Originally Released: 2007.10.31 (Happy halloween!)
 
 """
+import argparse
 import os
 import stat
 import sys
@@ -15,7 +16,7 @@ from pygame.locals import QUIT, KEYDOWN, K_ESCAPE
 
 file_list = []  # a list of all images being shown
 title = "pgSlideShow | My Slideshow!"  # caption of the window...
-waittime = 1   # how long to wait between images (in seconds)
+waittime = 1   # default time to wait between images (in seconds)
 
 
 def walktree(top, callback):
@@ -102,6 +103,21 @@ def main(startdir="."):
 
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser(
+        description='Recursively loads images '
+        'from a directory, then displays them in a Slidshow.'
+    )
+
+    parser.add_argument(
+        '--waittime',
+        type=int,
+        dest='waittime',
+        action='store',
+        default=1,
+        help='Amount of time to wait before showing the next image.'
+    )
+    args = parser.parse_args()
+    waittime = args.waittime
 
     if len(sys.argv) == 2:
         main(sys.argv[1])
