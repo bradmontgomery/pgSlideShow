@@ -109,6 +109,14 @@ if __name__ == '__main__':
     )
 
     parser.add_argument(
+        'path',
+        metavar='ImagePath',
+        type=str,
+        default='.',
+        nargs="?",
+        help='Path to a directory that contains images'
+    )
+    parser.add_argument(
         '--waittime',
         type=int,
         dest='waittime',
@@ -127,8 +135,4 @@ if __name__ == '__main__':
     args = parser.parse_args()
     waittime = args.waittime
     title = args.title
-
-    if len(sys.argv) == 2:
-        main(sys.argv[1])
-    else:
-        main()
+    main(startdir=args.path)
