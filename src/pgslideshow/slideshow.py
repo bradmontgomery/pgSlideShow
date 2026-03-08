@@ -1,5 +1,6 @@
 """Core slideshow functionality."""
 
+import itertools
 import os
 import stat
 import time
@@ -27,33 +28,35 @@ def walktree(top, callback):
             print(f"Skipping {pathname}")
 
 
-def addtolist(file, extensions=None):
-    """Add a file to a global list of image files."""
+def iter_files(startdir, extensions=None):
+    """Yield image files from the given directory using a generator."""
     if extensions is None:
         extensions = [".png", ".jpg", ".jpeg", ".gif", ".bmp"]
 
-    filename, ext = os.path.splitext(file)
-    e = ext.lower()
-    # Only add common image types to the list.
-    if e in extensions:
-        print(f"Adding to list: {file}")
-        return file
-    else:
-        print(f"Skipping: {file} (NOT a supported image)")
-        return None
-
-
-def build_file_list(startdir, extensions=None):
-    """Build a list of image files from the given directory."""
-    file_list = []
-
     def callback(filepath):
-        result = addtolist(filepath, extensions)
-        if result:
-            file_list.append(result)
+        filename, ext = os.path.splitext(filepath)
+        e = ext.lower()
+        if e in extensions:
+            print(f"Found image: {filepath}")
+            yield filepath
+        else:
+            print(f"Skipping: {filepath} (NOT a supported image)")
 
-    walktree(startdir, callback)
-    return file_list
+    for filepath in walktree_iter(startdir, callback):
+        yield filepath
+
+
+def walktree_iter(top, callback):
+    """Generator version of walktree that yields files."""
+    for f in os.listdir(top):
+        pathname = os.path.join(top, f)
+        mode = os.stat(pathname)[stat.ST_MODE]
+        if stat.S_ISDIR(mode):
+            yield from walktree_iter(pathname, callback)
+        elif stat.S_ISREG(mode):
+            yield from callback(pathname)
+        else:
+            print(f"Skipping {pathname}")
 
 
 def input_events(events):
@@ -66,22 +69,20 @@ def input_events(events):
 
 
 def run_slideshow(
-    file_list,
+    file_iter,
     title="pgSlideShow | My Slideshow!",
     waittime=1,
 ):
-    """Run the slideshow with the given list of image files."""
+    """Run the slideshow with the given generator of image files."""
     pygame.init()
 
-    # Test for image support
     if not pygame.image.get_extended():
         raise RuntimeError(
             "Your Pygame isn't built with extended image support. "
             "It's likely this isn't going to work."
         )
 
-    if len(file_list) == 0:
-        raise ValueError("Sorry. No images found.")
+    file_cycle = itertools.cycle(file_iter)
 
     modes = pygame.display.list_modes()
     pygame.display.set_mode(max(modes))
@@ -90,15 +91,14 @@ def run_slideshow(
     pygame.display.set_caption(title)
     pygame.display.toggle_fullscreen()
 
-    current = 0
-    num_files = len(file_list)
     running = True
+    filepath = None
 
     while running:
         try:
-            img = pygame.image.load(file_list[current])
+            filepath = next(file_cycle)
+            img = pygame.image.load(filepath)
             img = img.convert()
-            # rescale the image to fit the current display
             img = pygame.transform.scale(img, max(modes))
             screen.blit(img, (0, 0))
             pygame.display.flip()
@@ -107,8 +107,7 @@ def run_slideshow(
                 running = False
 
             time.sleep(waittime)
+        except StopIteration:
+            raise ValueError("Sorry. No images found.")
         except pygame.error as err:
-            print(f"Failed to display {file_list[current]}: {err}")
-
-        # When we get to the end, re-start at the beginning
-        current = (current + 1) % num_files
+            print(f"Failed to display {filepath}: {err}")

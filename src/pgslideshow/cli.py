@@ -3,14 +3,13 @@
 import argparse
 import sys
 
-from .slideshow import build_file_list, run_slideshow
+from .slideshow import iter_files, run_slideshow
 
 
 def create_parser():
     """Create and return the argument parser."""
     parser = argparse.ArgumentParser(
-        description="Recursively loads images "
-        "from a directory, then displays them in a Slideshow."
+        description="Recursively loads images from a directory, then displays them in a Slideshow."
     )
 
     parser.add_argument(
@@ -47,12 +46,10 @@ def main(args=None):
     parsed_args = parser.parse_args(args)
 
     try:
-        # Build the list of image files
-        file_list = build_file_list(parsed_args.path)
+        file_iter = iter_files(parsed_args.path)
 
-        # Run the slideshow
         run_slideshow(
-            file_list=file_list,
+            file_iter=file_iter,
             title=parsed_args.title,
             waittime=parsed_args.waittime,
         )
