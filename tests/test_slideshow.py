@@ -3,6 +3,7 @@
 import os
 
 from pgslideshow.slideshow import (
+    get_supported_extensions,
     iter_files,
     walktree,
     walktree_iter,
@@ -100,9 +101,12 @@ class TestIterFiles:
 
     def test_iter_files_finds_images(self, temp_image_dir):
         """iter_files should yield only image files."""
+        supported = get_supported_extensions()
+        expected = [".png", ".jpg", ".jpeg", ".gif", ".bmp"]
+        expected_count = len([e for e in expected if e in supported])
         results = list(iter_files(str(temp_image_dir)))
 
-        assert len(results) == 5
+        assert len(results) == expected_count
 
     def test_iter_files_skips_non_images(self, temp_image_dir):
         """iter_files should skip non-image files."""
@@ -113,9 +117,11 @@ class TestIterFiles:
 
     def test_iter_files_nested_directories(self, nested_image_dir):
         """iter_files should find images in nested directories."""
+        supported = get_supported_extensions()
+        expected_count = len([e for e in [".png", ".jpg", ".gif", ".bmp"] if e in supported])
         results = list(iter_files(str(nested_image_dir)))
 
-        assert len(results) == 4
+        assert len(results) == expected_count
 
     def test_iter_files_empty_directory(self, empty_dir):
         """iter_files should handle empty directories."""
@@ -135,9 +141,12 @@ class TestIterFiles:
         (tmp_path / "test.JPG").touch()
         (tmp_path / "test.GIF").touch()
 
+        supported = get_supported_extensions()
+        expected_count = len([e for e in [".png", ".jpg", ".gif"] if e in supported])
+
         results = list(iter_files(str(tmp_path)))
 
-        assert len(results) == 3
+        assert len(results) == expected_count
 
     def test_iter_files_custom_extensions(self, tmp_path):
         """iter_files should accept custom extensions."""
@@ -161,6 +170,9 @@ class TestIterFiles:
         for ext in extensions:
             (tmp_path / f"image{ext}").touch()
 
+        supported = get_supported_extensions()
+        expected_count = len([e for e in extensions if e in supported])
+
         results = list(iter_files(str(tmp_path)))
 
-        assert len(results) == 5
+        assert len(results) == expected_count

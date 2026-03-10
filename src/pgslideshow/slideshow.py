@@ -1,12 +1,53 @@
 """Core slideshow functionality."""
 
+import functools
 import itertools
 import os
 import stat
+import tempfile
 import time
 
 import pygame
-from pygame.locals import KEYDOWN, K_ESCAPE, QUIT
+from pygame.locals import K_ESCAPE, KEYDOWN, QUIT
+
+
+@functools.lru_cache(maxsize=1)
+def get_supported_extensions():
+    """Detect which image extensions are supported by the current pygame/SDL installation."""
+    if not pygame.image.get_extended():
+        return frozenset()
+
+    test_exts = (
+        ".png",
+        ".jpg",
+        ".jpeg",
+        ".gif",
+        ".bmp",
+        ".tiff",
+        ".tif",
+        ".webp",
+        ".pcx",
+        ".ppm",
+        ".pgm",
+        ".pbm",
+        ".xpm",
+    )
+
+    supported = set()
+    surf = pygame.Surface((1, 1))
+    surf.set_at((0, 0), (255, 0, 0))
+
+    for ext in test_exts:
+        try:
+            with tempfile.NamedTemporaryFile(suffix=ext, delete=True) as f:
+                temp_path = f.name
+            pygame.image.save(surf, temp_path)
+            pygame.image.load(temp_path)
+            supported.add(ext)
+        except Exception:
+            pass
+
+    return frozenset(supported)
 
 
 def walktree(top, callback):
@@ -31,7 +72,7 @@ def walktree(top, callback):
 def iter_files(startdir, extensions=None):
     """Yield image files from the given directory using a generator."""
     if extensions is None:
-        extensions = [".png", ".jpg", ".jpeg", ".gif", ".bmp"]
+        extensions = get_supported_extensions()
 
     def callback(filepath):
         filename, ext = os.path.splitext(filepath)
